@@ -24,14 +24,15 @@ const BackupRestore: React.FC = () => {
     setProgress({ visible: true, pct: 0, label: 'Preparing backup' });
     try {
       const { base64, fileName } = await backupService.exportZip((pct, label) => setProgress({ visible: true, pct, label }));
-      if (Capacitor.getPlatform() === 'web') {
-        shareService.downloadBase64(base64, fileName, 'application/zip');
-        toast('Backup downloaded', 'success');
-      } else {
-        const { uri } = await fileService.saveBackup(base64, fileName);
-        await shareService.shareFile(uri, fileName, 'ATC FieldConnect backup');
-        toast('Backup created', 'success');
-      }
+      const result = await shareService.deliverFile({
+        base64,
+        fileName,
+        mime: 'application/zip',
+        title: 'ATC FieldConnect backup',
+        text: 'Local backup of ATC FieldConnect visits, images and settings',
+        target: 'backup',
+      });
+      toast(result.method === 'download' ? 'Backup downloaded' : 'Backup created', 'success');
       setLastBackup(fileName);
       haptic('success');
     } catch (e) {

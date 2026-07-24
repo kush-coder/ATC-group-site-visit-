@@ -29,6 +29,8 @@ const Reports: React.FC = () => {
   const [progress, setProgress] = useState({ visible: false, pct: 0, label: '' });
   const [lastFile, setLastFile] = useState<{ base64: string; fileName: string; uri?: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  // Native always has a share sheet; on web it depends on Web Share API support.
+  const canShareFiles = Capacitor.getPlatform() !== 'web' || shareService.canWebShareFile('r.xlsx', XLSX_MIME);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -69,8 +71,7 @@ const Reports: React.FC = () => {
       });
       let uri: string | undefined;
       if (Capacitor.getPlatform() === 'web') {
-        shareService.downloadBase64(base64, fileName, XLSX_MIME);
-        toast('Report downloaded', 'success');
+        toast('Report ready — tap Share to save or send it', 'success');
       } else {
         const saved = await fileService.saveReport(base64, fileName);
         uri = saved.uri;
@@ -91,12 +92,17 @@ const Reports: React.FC = () => {
   const shareReport = async () => {
     if (!lastFile) return;
     try {
-      if (Capacitor.getPlatform() === 'web') {
-        shareService.downloadBase64(lastFile.base64, lastFile.fileName, XLSX_MIME);
-      } else {
-        const uri = lastFile.uri ?? (await fileService.saveReport(lastFile.base64, lastFile.fileName)).uri;
-        await shareService.shareFile(uri, lastFile.fileName, 'ATC FieldConnect Day-End Report');
-      }
+      const result = await shareService.deliverFile({
+        base64: lastFile.base64,
+        fileName: lastFile.fileName,
+        mime: XLSX_MIME,
+        title: 'ATC FieldConnect Day-End Report',
+        text: `Day-end report for ${formatDate(date)}`,
+        uri: lastFile.uri,
+        target: 'report',
+      });
+      if (result.cancelled) return;
+      if (result.method === 'download') toast('Report downloaded', 'success');
     } catch {
       toast('Sharing failed', 'error');
     }
@@ -169,7 +175,8 @@ const Reports: React.FC = () => {
                   <div className="atc-row"><IonIcon icon={checkmarkCircle} style={{ color: 'var(--atc-success)', fontSize: 24 }} /><strong>Report ready</strong></div>
                   <div className="atc-muted" style={{ marginTop: 6, wordBreak: 'break-all' }}>{lastFile.fileName}</div>
                   <IonButton expand="block" onClick={shareReport} style={{ '--border-radius': '12px', marginTop: 10 }}>
-                    <IonIcon slot="start" icon={shareSocialOutline} /> Share Excel
+                    <IonIcon slot="start" icon={canShareFiles ? shareSocialOutline : downloadOutline} />
+                    {canShareFiles ? 'Share Excel' : 'Download Excel'}
                   </IonButton>
                 </div>
               )}

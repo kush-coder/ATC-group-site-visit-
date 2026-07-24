@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
   IonPage, IonContent, IonHeader, IonToolbar, IonButtons, IonBackButton, IonTitle,
   IonIcon, IonButton, IonAlert, IonActionSheet, useIonViewWillEnter,
@@ -37,6 +37,7 @@ const VisitDetails: React.FC = () => {
   const [deleteAlert, setDeleteAlert] = useState(false);
   const [sheet, setSheet] = useState(false);
   const [progress, setProgress] = useState({ visible: false, pct: 0, label: '' });
+  const pendingAction = useRef<(() => void) | null>(null);
 
   const load = useCallback(async () => {
     const b = await getVisitBundle(Number(id));
@@ -83,13 +84,15 @@ const VisitDetails: React.FC = () => {
         includeImages: true,
         onProgress: (pct, label) => setProgress({ visible: true, pct, label }),
       });
-      if (Capacitor.getPlatform() === 'web') {
-        shareService.downloadBase64(base64, fileName, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        toast('Report downloaded', 'success');
-      } else {
-        const { uri } = await fileService.saveReport(base64, fileName);
-        await shareService.shareFile(uri, fileName, `ATC FieldConnect report — ${v.client_name}`);
-      }
+      const result = await shareService.deliverFile({
+        base64,
+        fileName,
+        mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        title: `ATC FieldConnect report — ${v.client_name}`,
+        text: `Visit report for ${v.business_name} (${v.visit_number})`,
+        target: 'report',
+      });
+      if (result.method === 'download') toast('Report downloaded', 'success');
       haptic('success');
     } catch (e) {
       toast('Report generation failed', 'error');
@@ -265,13 +268,24 @@ const VisitDetails: React.FC = () => {
         </div>
       </IonContent>
 
-      <IonActionSheet isOpen={sheet} onDidDismiss={() => setSheet(false)} header="Visit actions"
+      {/*
+        Defer the chosen action until the sheet has dismissed - Ionic waits on a
+        promise-returning handler, which would otherwise keep this sheet stacked
+        above the report progress overlay.
+      */}
+      <IonActionSheet isOpen={sheet} header="Visit actions"
+        onDidDismiss={() => {
+          setSheet(false);
+          const action = pendingAction.current;
+          pendingAction.current = null;
+          action?.();
+        }}
         buttons={[
-          { text: 'Edit', icon: createOutline, handler: () => history.push(`/visit/edit/${id}`) },
-          { text: 'Duplicate', icon: copyOutline, handler: duplicate },
-          { text: 'Share summary', icon: shareSocialOutline, handler: shareSummary },
-          { text: 'Generate report', icon: documentTextOutline, handler: generateIndividualReport },
-          { text: 'Delete', icon: trashOutline, role: 'destructive', handler: () => setDeleteAlert(true) },
+          { text: 'Edit', icon: createOutline, handler: () => { pendingAction.current = () => history.push(`/visit/edit/${id}`); } },
+          { text: 'Duplicate', icon: copyOutline, handler: () => { pendingAction.current = () => void duplicate(); } },
+          { text: 'Share summary', icon: shareSocialOutline, handler: () => { pendingAction.current = () => void shareSummary(); } },
+          { text: 'Generate report', icon: documentTextOutline, handler: () => { pendingAction.current = () => void generateIndividualReport(); } },
+          { text: 'Delete', icon: trashOutline, role: 'destructive', handler: () => { pendingAction.current = () => setDeleteAlert(true); } },
           { text: 'Cancel', role: 'cancel' },
         ]} />
 

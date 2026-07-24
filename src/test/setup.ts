@@ -222,7 +222,12 @@ vi.mock('@/services/notifications/notificationService', () => ({
 }));
 
 vi.mock('@/services/share/shareService', () => ({
-  shareService: { shareFile: vi.fn(async () => {}), shareText: vi.fn(async () => {}), downloadBase64: vi.fn(() => {}) },
+  shareService: {
+    canWebShareFile: vi.fn(() => false),
+    deliverFile: vi.fn(async () => ({ method: 'download', cancelled: false })),
+    shareText: vi.fn(async () => {}),
+    downloadBase64: vi.fn(() => {}),
+  },
 }));
 
 /**

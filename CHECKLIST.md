@@ -38,7 +38,7 @@ Status legend: ✅ implemented · 🟡 implemented with noted scope
 
 ## 9. New Client Visit (11 steps)
 - ✅ Step 1 Visit info (auto date/time, editable, visit types)
-- ✅ Step 2 Images (camera + gallery, retake/delete, multiple ≤5, primary select, compression, path in SQLite, mandatory ≥1)
+- ✅ Step 2 Images (native camera on device, **real in-browser `getUserMedia` camera on web**, gallery, retake/delete, multiple ≤5, primary select, compression, path in SQLite, mandatory ≥1)
 - ✅ Step 3 Client details (all fields + category + phone/email validation)
 - ✅ Step 4 GPS (capture lat/long/accuracy/time, confirmation card, optional, offline)
 - ✅ Step 5 Existing systems (Yes/No/Not confirmed, multiple systems)
@@ -60,7 +60,7 @@ Status legend: ✅ implemented · 🟡 implemented with noted scope
 
 ## 15–17. Reports & Excel
 - ✅ Day-End screen with all summary stats + record counts
-- ✅ Preview stats, Generate Full (images) / Lightweight, Share, Save to device
+- ✅ Preview stats, Generate Full (images) / Lightweight, Save to device; sharing via OS share sheet on device and **Web Share API on web, with download fallback**
 - ✅ Animated progress overlay, success + confetti, duplicate-click guard, error handling
 - ✅ 5-sheet styled workbook, 60-column details sheet, embedded primary images + dedicated Images sheet
 - ✅ Thumbnail compression for Excel, large-image warning, async generation (UI stays responsive)
@@ -93,5 +93,4 @@ Status legend: ✅ implemented · 🟡 implemented with noted scope
 - ✅ This checklist
 
 ## Notes / Scope
-- 🟡 Browser preview uses the OS file picker for "camera" (native camera works on device); sharing a file requires the device build (web offers direct download).
 - 🟡 Logo is an editable placeholder pending the official ATC Group asset.

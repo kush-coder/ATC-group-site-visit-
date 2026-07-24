@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { IonIcon, IonActionSheet } from '@ionic/react';
 import { cameraOutline, imagesOutline, trashOutline, starOutline, star, addOutline } from 'ionicons/icons';
 import StoredImage from '@/components/images/StoredImage';
@@ -21,6 +21,7 @@ const ImageStep: React.FC<Props> = ({ images, onChange }) => {
   const { toast, haptic } = useApp();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const pendingSource = useRef<CameraSource | null>(null);
 
   const add = async (source: CameraSource) => {
     if (images.length >= MAX_IMAGES) { toast(`Maximum ${MAX_IMAGES} photos`, 'warning'); return; }
@@ -95,13 +96,23 @@ const ImageStep: React.FC<Props> = ({ images, onChange }) => {
         </div>
       ))}
 
+      {/*
+        Ionic awaits a promise-returning handler before dismissing, which would
+        keep this sheet stacked above the capture UI for the whole capture.
+        Record the choice, then act once the sheet has actually gone away.
+      */}
       <IonActionSheet
         isOpen={sheetOpen}
-        onDidDismiss={() => setSheetOpen(false)}
+        onDidDismiss={() => {
+          setSheetOpen(false);
+          const source = pendingSource.current;
+          pendingSource.current = null;
+          if (source !== null) void add(source);
+        }}
         header="Add photo"
         buttons={[
-          { text: 'Take photo', icon: cameraOutline, handler: () => add(CameraSource.Camera) },
-          { text: 'Choose from gallery', icon: imagesOutline, handler: () => add(CameraSource.Photos) },
+          { text: 'Take photo', icon: cameraOutline, handler: () => { pendingSource.current = CameraSource.Camera; } },
+          { text: 'Choose from gallery', icon: imagesOutline, handler: () => { pendingSource.current = CameraSource.Photos; } },
           { text: 'Cancel', role: 'cancel' },
         ]}
       />

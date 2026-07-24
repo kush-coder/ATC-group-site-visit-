@@ -122,8 +122,19 @@ npm install
 npm run dev
 ```
 Open http://localhost:5173. The browser preview uses the jeep-sqlite web store so you can
-exercise the full flow (sample data is seeded automatically on first run). Camera capture
-in the browser falls back to the OS file picker; native camera/GPS/sharing require a device build.
+exercise the full flow, including a **real camera** and **real file sharing** (sample data is
+seeded automatically on first run):
+
+| Capability | On device | In the browser preview |
+|---|---|---|
+| Camera | Native camera via Capacitor | Live in-app camera via `getUserMedia` (front/rear switch, shutter) — **not** a file picker |
+| Gallery | Native picker | OS file picker |
+| Share report / backup | OS share sheet (WhatsApp, Email, Drive, Bluetooth…) | Web Share API share sheet where supported, otherwise a direct download |
+| GPS | Device GPS | Browser geolocation |
+
+Buttons adapt to the actual capability — the report action reads *Share Excel* when the
+browser can share files and *Download Excel* when it cannot, so it never promises something
+the platform won't do.
 
 ### Type-check & production web build
 ```bash

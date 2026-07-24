@@ -3,6 +3,7 @@ import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { Route, Redirect } from 'react-router-dom';
 import { AppProvider } from '@/hooks/AppContext';
+import WebCameraHost from '@/components/camera/WebCameraHost';
 
 import Splash from '@/pages/Splash/Splash';
 import EmployeeSetup from '@/pages/EmployeeSetup/EmployeeSetup';
@@ -49,6 +50,8 @@ const App: React.FC = () => (
           </Route>
         </IonRouterOutlet>
       </IonReactRouter>
+      {/* Real in-browser camera for the web preview; inert on device. */}
+      <WebCameraHost />
     </AppProvider>
   </IonApp>
 );
