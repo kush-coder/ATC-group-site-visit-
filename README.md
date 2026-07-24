@@ -84,7 +84,7 @@ empty states — edge-to-edge and safe-area aware.
 - 📊 **Excel report generation** (ExcelJS) with **embedded client images** across 5 styled sheets — [download a sample report ⬇](docs/sample-report/ATC_FieldConnect_Day_End_Report_RahulSharma_2026-07-24.xlsx)
 - 🔁 **Auto-save drafts** so an accidental close never loses work
 - 💾 **Local backup & restore** as a single ZIP (database + images + profile + settings)
-- 🔐 **Optional 4-digit PIN + biometric** lock, session timeout, on-device-only data
+- 🔐 **Optional 4-digit PIN + working biometric unlock** (fingerprint / face / iris), session timeout, on-device-only data
 - 🟢 Premium **green-and-white** UI with smooth animations, skeletons, empty states
 - 🔔 **Local notification reminders** for follow-ups
 
@@ -261,10 +261,31 @@ sharing over patchy field connections.
 
 ---
 
-## 🔒 Privacy
+## 🔒 Privacy & App Lock
 
 All records and images live **only** on the device. Nothing is uploaded. Uninstalling
 the app removes local data — use **Backup & Restore** to keep it safe.
+
+### Biometric unlock
+
+Powered by [`@aparajita/capacitor-biometric-auth`](https://www.npmjs.com/package/@aparajita/capacitor-biometric-auth)
+(fingerprint, face or iris, depending on the device).
+
+**Biometrics accelerate the PIN — they never replace it.** The design rules:
+
+- The **PIN must be enabled first**; Settings refuses to turn on biometrics without it.
+  A sensor that fails, gets locked out, or stops being enrolled can then never lock an
+  employee out of their own on-device data.
+- Enabling runs a **verification prompt up front**, so the lock is only ever armed once
+  the employee has successfully passed it.
+- On the lock screen the sensor is **offered automatically**, with a fingerprint key to
+  retry. A cancelled prompt quietly returns to the keypad.
+- Device state is reported honestly: *not enrolled*, *no screen lock*, *locked out*, and
+  *unsupported* each produce their own actionable message instead of a generic failure.
+
+Permissions are declared in `AndroidManifest.xml` (`USE_BIOMETRIC`, plus `USE_FINGERPRINT`
+for API 23–28 since `minSdkVersion` is 22). The plugin supplies `androidx.biometric` and
+its own activity, so no `MainActivity` changes are needed.
 
 ---
 

@@ -24,7 +24,7 @@ Status legend: ✅ implemented · 🟡 implemented with noted scope
 ## 6. First-time setup
 - ✅ Employee setup captures all requested fields + optional photo + manager
 - ✅ Stored locally; name & photo shown on dashboard; editable from Profile
-- ✅ Optional 4-digit PIN; biometric toggle (device-dependent)
+- ✅ Optional 4-digit PIN; **working biometric unlock** (fingerprint / face / iris) with the PIN as fallback
 
 ## 7. Splash
 - ✅ Logo, name, tagline, animated green gradient, animated icons, "Developed by ATC Group"
@@ -75,7 +75,7 @@ Status legend: ✅ implemented · 🟡 implemented with noted scope
 - ✅ Storage screen: counts + sizes, delete reports (confirm), backup/restore links
 
 ## 22–24. Security & Permissions
-- ✅ Optional PIN (SHA-256 hash, never plain), biometric toggle, session timeout, encrypted-preference settings
+- ✅ Optional PIN (SHA-256 hash, never plain), **biometric unlock wired to `@aparajita/capacitor-biometric-auth`**, session timeout, encrypted-preference settings
 - ✅ Confirm before delete/restore, backup validation, no file paths in UI
 - ✅ Android permissions declared (camera, media, location, notifications, biometric); graceful denial handling
 
@@ -93,6 +93,5 @@ Status legend: ✅ implemented · 🟡 implemented with noted scope
 - ✅ This checklist
 
 ## Notes / Scope
-- 🟡 Biometric unlock exposes a toggle and manifest permission; wiring to a specific biometric plugin is left as a device-integration step (PIN fully functional).
 - 🟡 Browser preview uses the OS file picker for "camera" (native camera works on device); sharing a file requires the device build (web offers direct download).
 - 🟡 Logo is an editable placeholder pending the official ATC Group asset.

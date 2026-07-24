@@ -19,6 +19,7 @@
     "test:ui": "vitest --ui"
   },
   "dependencies": {
+    "@aparajita/capacitor-biometric-auth": "^8.0.2",
     "@capacitor-community/sqlite": "^6.0.2",
     "@capacitor/android": "^6.2.0",
     "@capacitor/app": "^6.0.2",

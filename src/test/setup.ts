@@ -4,7 +4,7 @@
  * native plugins, SQLite, the camera, GPS, or the filesystem.
  */
 import '@testing-library/jest-dom/vitest';
-import { vi, afterEach } from 'vitest';
+import { vi, afterEach, beforeEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 
 afterEach(() => cleanup());
@@ -88,10 +88,24 @@ const fx = vi.hoisted(() => {
     todayVisits: 1, completedVisits: 1, pendingFollowUps: 1, highPotential: 1,
     consumableOpps: 1, printerOpps: 1, softwareOpps: 1, mobileAppOpps: 0, estimatedValue: 250000,
   };
-  return { sampleProfile, sampleVisit, sampleBundle, stats };
+  // Mutable per-test state: override `state.profile` to exercise PIN /
+  // biometric variations, and read `state.toasts` to assert user feedback.
+  const state: { profile: any; toasts: { msg: string; kind: string }[] } = {
+    profile: sampleProfile,
+    toasts: [],
+  };
+  return { sampleProfile, sampleVisit, sampleBundle, stats, state };
 });
 
 export const fixtures = fx;
+
+/** Reset mutable fixture state between tests. */
+export function resetFixtures(profileOverrides: Record<string, unknown> = {}) {
+  fx.state.profile = { ...fx.sampleProfile, ...profileOverrides };
+  fx.state.toasts = [];
+}
+
+beforeEach(() => resetFixtures());
 
 /* ------------------------------------------------------------------ */
 /* Ionic lifecycle hooks -> fire once on mount so page loaders run     */
@@ -129,9 +143,9 @@ vi.mock('@capacitor/camera', () => ({
 vi.mock('@/hooks/AppContext', () => ({
   useApp: () => ({
     dbReady: true,
-    profile: fx.sampleProfile,
+    profile: fx.state.profile,
     refreshProfile: vi.fn(async () => {}),
-    toast: vi.fn(),
+    toast: (msg: string, kind = 'info') => fx.state.toasts.push({ msg, kind }),
     haptic: vi.fn(),
   }),
   AppProvider: ({ children }: { children: any }) => children,
@@ -210,6 +224,47 @@ vi.mock('@/services/notifications/notificationService', () => ({
 vi.mock('@/services/share/shareService', () => ({
   shareService: { shareFile: vi.fn(async () => {}), shareText: vi.fn(async () => {}), downloadBase64: vi.fn(() => {}) },
 }));
+
+/**
+ * Biometric plugin: unavailable by default (matches a jsdom/web environment).
+ * Individual tests can override with vi.mocked(...) as needed.
+ */
+vi.mock('@aparajita/capacitor-biometric-auth', () => {
+  class BiometryError extends Error {
+    code: string;
+    constructor(message: string, code: string) {
+      super(message);
+      this.code = code;
+    }
+  }
+  return {
+    BiometricAuth: {
+      checkBiometry: vi.fn(async () => ({
+        isAvailable: false,
+        strongBiometryIsAvailable: false,
+        biometryType: 0,
+        biometryTypes: [],
+        deviceIsSecure: false,
+        reason: 'Biometry unavailable in test environment',
+        code: 'biometryNotAvailable',
+      })),
+      authenticate: vi.fn(async () => undefined),
+    },
+    BiometryError,
+    BiometryType: {
+      none: 0, touchId: 1, faceId: 2,
+      fingerprintAuthentication: 3, faceAuthentication: 4, irisAuthentication: 5,
+    },
+    BiometryErrorType: {
+      none: '', appCancel: 'appCancel', authenticationFailed: 'authenticationFailed',
+      invalidContext: 'invalidContext', notInteractive: 'notInteractive',
+      passcodeNotSet: 'passcodeNotSet', systemCancel: 'systemCancel',
+      userCancel: 'userCancel', userFallback: 'userFallback',
+      biometryLockout: 'biometryLockout', biometryNotAvailable: 'biometryNotAvailable',
+      biometryNotEnrolled: 'biometryNotEnrolled', noDeviceCredential: 'noDeviceCredential',
+    },
+  };
+});
 
 vi.mock('@/services/security/securityService', () => ({
   securityService: {

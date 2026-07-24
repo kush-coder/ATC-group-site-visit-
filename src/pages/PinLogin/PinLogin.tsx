@@ -1,16 +1,54 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { IonPage, IonContent, IonIcon } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { backspaceOutline, fingerPrintOutline, lockClosedOutline } from 'ionicons/icons';
 import AtcLogo from '@/components/common/AtcLogo';
 import { useApp } from '@/hooks/AppContext';
 import { securityService } from '@/services/security/securityService';
+import { biometricService } from '@/services/security/biometricService';
 
 const PinLogin: React.FC = () => {
   const history = useHistory();
   const { profile, toast, haptic } = useApp();
   const [pin, setPin] = useState('');
   const [shake, setShake] = useState(false);
+  const [bioBusy, setBioBusy] = useState(false);
+  const [bioAvailable, setBioAvailable] = useState(false);
+  const promptedRef = useRef(false);
+
+  const unlock = useCallback(async () => {
+    await securityService.markActive();
+    haptic('success');
+    history.replace('/dashboard');
+  }, [haptic, history]);
+
+  const runBiometric = useCallback(async (auto: boolean) => {
+    if (bioBusy) return;
+    setBioBusy(true);
+    try {
+      const result = await biometricService.authenticate('Unlock ATC FieldConnect');
+      if (result.ok) {
+        await unlock();
+      } else if (!auto || !result.cancelled) {
+        // A silently cancelled auto-prompt shouldn't nag; everything else does.
+        haptic('error');
+        toast(result.message, result.lockedOut ? 'warning' : 'info');
+      }
+    } finally {
+      setBioBusy(false);
+    }
+  }, [bioBusy, unlock, haptic, toast]);
+
+  // Offer biometrics automatically when the employee has enabled them.
+  useEffect(() => {
+    if (!profile?.biometric_enabled || promptedRef.current) return;
+    promptedRef.current = true;
+    (async () => {
+      const info = await biometricService.availability();
+      setBioAvailable(info.available);
+      if (info.available) await runBiometric(true);
+    })();
+  }, [profile?.biometric_enabled, runBiometric]);
 
   useEffect(() => {
     if (pin.length === 4) verify(pin);
@@ -20,9 +58,7 @@ const PinLogin: React.FC = () => {
   const verify = async (value: string) => {
     const ok = await securityService.verifyPin(value, profile?.pin_hash ?? null);
     if (ok) {
-      await securityService.markActive();
-      haptic('success');
-      history.replace('/dashboard');
+      await unlock();
     } else {
       haptic('error');
       setShake(true);
@@ -56,7 +92,19 @@ const PinLogin: React.FC = () => {
             {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((d) => (
               <button key={d} onClick={() => press(d)} style={keyStyle}>{d}</button>
             ))}
-            <button onClick={() => profile?.biometric_enabled ? toast('Use device biometrics', 'info') : undefined} style={{ ...keyStyle, background: 'transparent', fontSize: 22 }}>
+            <button
+              aria-label="Unlock with biometrics"
+              disabled={!profile?.biometric_enabled || bioBusy}
+              onClick={() => runBiometric(false)}
+              className={bioBusy ? 'atc-pulse' : ''}
+              style={{
+                ...keyStyle,
+                background: 'transparent',
+                fontSize: 22,
+                opacity: profile?.biometric_enabled ? 1 : 0.25,
+                cursor: profile?.biometric_enabled ? 'pointer' : 'default',
+              }}
+            >
               <IonIcon icon={fingerPrintOutline} />
             </button>
             <button onClick={() => press('0')} style={keyStyle}>0</button>
@@ -64,6 +112,12 @@ const PinLogin: React.FC = () => {
               <IonIcon icon={backspaceOutline} />
             </button>
           </div>
+
+          {profile?.biometric_enabled && bioAvailable && (
+            <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 12, marginTop: 20 }}>
+              {bioBusy ? 'Waiting for biometrics…' : 'Tap the fingerprint icon to unlock with biometrics'}
+            </div>
+          )}
 
           <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12, marginTop: 28, display: 'flex', alignItems: 'center', gap: 6 }}>
             <IonIcon icon={lockClosedOutline} /> Your data is stored only on this device

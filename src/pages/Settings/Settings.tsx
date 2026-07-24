@@ -13,6 +13,7 @@ import { ToggleRow, TextInput, Select } from '@/components/forms/fields';
 import { useApp } from '@/hooks/AppContext';
 import { employeeRepo } from '@/services/database/repository';
 import { securityService } from '@/services/security/securityService';
+import { biometricService, BiometryAvailability } from '@/services/security/biometricService';
 
 const Settings: React.FC = () => {
   const history = useHistory();
@@ -21,6 +22,11 @@ const Settings: React.FC = () => {
   const [newPin, setNewPin] = useState('');
   const [defaults, setDefaults] = useState({ city: '', state: '', followUpTime: '10:00', imageQuality: 'Standard', includeImages: '1' });
   const [prefsOpen, setPrefsOpen] = useState(false);
+  const [biometry, setBiometry] = useState<BiometryAvailability | null>(null);
+
+  useEffect(() => {
+    biometricService.availability().then(setBiometry);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -55,9 +61,36 @@ const Settings: React.FC = () => {
   };
 
   const toggleBiometric = async (enable: boolean) => {
-    await employeeRepo.upsert({ biometric_enabled: enable ? 1 : 0 });
+    if (!enable) {
+      await employeeRepo.upsert({ biometric_enabled: 0 });
+      await refreshProfile();
+      toast('Biometric unlock disabled', 'info');
+      return;
+    }
+    // Biometry accelerates the PIN, it never replaces it — otherwise a failed
+    // or locked-out sensor would lock the employee out of their own data.
+    if (!profile?.pin_enabled) {
+      toast('Enable the application PIN first — it is the fallback for biometrics.', 'warning');
+      return;
+    }
+    const info = await biometricService.availability();
+    setBiometry(info);
+    if (!info.available) {
+      haptic('error');
+      toast(info.reason, 'warning');
+      return;
+    }
+    // Verify once up front so we never enable a lock the employee can't pass.
+    const result = await biometricService.authenticate(`Confirm ${info.label} to enable unlock`);
+    if (!result.ok) {
+      haptic('error');
+      toast(result.message, result.cancelled ? 'info' : 'error');
+      return;
+    }
+    await employeeRepo.upsert({ biometric_enabled: 1 });
     await refreshProfile();
-    toast(enable ? 'Biometric unlock enabled' : 'Biometric unlock disabled', 'info');
+    haptic('success');
+    toast(`${info.label} unlock enabled`, 'success');
   };
 
   const MenuItem: React.FC<{ icon: string; label: string; sub?: string; onClick?: () => void; accent?: string }> = ({ icon, label, sub, onClick, accent = 'var(--atc-primary)' }) => (
@@ -97,9 +130,22 @@ const Settings: React.FC = () => {
           <div className="atc-section-title">Security</div>
           <div className="atc-card" style={{ padding: 14 }}>
             <ToggleRow label="Application PIN" checked={!!profile?.pin_enabled} onChange={togglePin} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6 }}>
-              <IonIcon icon={fingerPrintOutline} style={{ color: 'var(--atc-primary)' }} />
-              <div style={{ flex: 1 }}><ToggleRow label="Biometric unlock (if supported)" checked={!!profile?.biometric_enabled} onChange={toggleBiometric} /></div>
+            <ToggleRow
+              label={`${biometry?.label ?? 'Biometric'} unlock`}
+              checked={!!profile?.biometric_enabled}
+              onChange={toggleBiometric}
+            />
+            <div className="atc-row" style={{ marginTop: 10, alignItems: 'flex-start', gap: 8 }}>
+              <IonIcon icon={fingerPrintOutline} style={{ color: biometry?.available ? 'var(--atc-primary)' : 'var(--atc-text-secondary)', marginTop: 2 }} />
+              <div className="atc-muted" style={{ flex: 1 }}>
+                {biometry === null
+                  ? 'Checking device biometrics…'
+                  : !profile?.pin_enabled
+                    ? 'Turn on the application PIN first — it stays available as the fallback if biometrics fail.'
+                    : biometry.available
+                      ? `${biometry.label} is enrolled on this device. Your PIN always remains available as a fallback.`
+                      : biometry.reason}
+              </div>
             </div>
           </div>
 
