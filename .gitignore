@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+dist-ssr/
+*.local
+
+# Vite / editor
+.vite/
+.DS_Store
+*.log
+npm-debug.log*
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Capacitor / Android build artifacts
+android/app/src/main/assets/public/
+android/app/build/
+android/build/
+android/.gradle/
+android/captures/
+android/local.properties
+android/app/release/
+*.apk
+*.aab
+*.keystore
+!debug.keystore
+
+# iOS (future)
+ios/App/Pods/
+ios/App/build/
+
+# Env
+.env
+.env.local

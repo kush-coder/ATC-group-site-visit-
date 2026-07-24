@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ATC FieldConnect</string>
+    <string name="title_activity_main">ATC FieldConnect</string>
+    <string name="package_name">com.atcgroup.fieldconnect</string>
+    <string name="custom_url_scheme">com.atcgroup.fieldconnect</string>
+</resources>
