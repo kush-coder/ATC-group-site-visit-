@@ -81,7 +81,7 @@ empty states — edge-to-edge and safe-area aware.
 - 📵 **100% offline** — SQLite database + device file storage, no internet required
 - 📸 **Camera & gallery** capture with automatic image compression (paths stored in SQLite, not blobs)
 - 📍 **GPS capture** that works offline (coordinates only, no map tiles needed)
-- 📊 **Excel report generation** (ExcelJS) with **embedded client images** across 5 styled sheets
+- 📊 **Excel report generation** (ExcelJS) with **embedded client images** across 5 styled sheets — [download a sample report ⬇](docs/sample-report/ATC_FieldConnect_Day_End_Report_RahulSharma_2026-07-24.xlsx)
 - 🔁 **Auto-save drafts** so an accidental close never loses work
 - 💾 **Local backup & restore** as a single ZIP (database + images + profile + settings)
 - 🔐 **Optional 4-digit PIN + biometric** lock, session timeout, on-device-only data
@@ -230,6 +230,34 @@ Visit numbers are generated locally as `ATC-VISIT-YYYYMMDD-0001`.
 Reports come in **Full (with images)** and **Lightweight** variants, generate
 asynchronously with a progress indicator, and can be shared to WhatsApp / Email /
 Drive / Bluetooth / File manager via the OS share sheet.
+
+### 📥 Download a sample report
+
+These are **real files produced by the app** — generated on the Day-End Report
+screen from the five built-in sample visits, exactly as an employee receives them.
+
+| Sample file | Variant | Size | Contents |
+|---|---|---|---|
+| **[⬇ ATC_FieldConnect_Day_End_Report_RahulSharma_2026-07-24.xlsx](docs/sample-report/ATC_FieldConnect_Day_End_Report_RahulSharma_2026-07-24.xlsx)** | Full — with images | 53 KB | 5 sheets · **10 embedded photos** |
+| **[⬇ ..._2026-07-24_Lightweight.xlsx](docs/sample-report/ATC_FieldConnect_Day_End_Report_RahulSharma_2026-07-24_Lightweight.xlsx)** | Lightweight | 13 KB | 4 sheets · no images |
+
+What's inside the full sample:
+
+| Sheet | Rows | Columns | Embedded images |
+|---|---:|---:|---:|
+| Day-End Summary | 17 | 4 | — |
+| Client Visit Details | 6 (header + 5 visits) | **60** | 5 (primary photo per visit) |
+| Opportunity Summary | 9 (header + 8 opportunities) | 11 | — |
+| Follow-Up Report | 5 (header + 4 follow-ups) | 11 | — |
+| Visit Images | 6 (header + 5 images) | 7 | 5 |
+
+The Lightweight variant carries the same 60-column detail sheet and totals but
+drops all images and the *Visit Images* sheet — a 4× smaller file for quick
+sharing over patchy field connections.
+
+> Regenerate them any time with `node scripts/generate-sample-report.mjs`
+> (see the script header for prerequisites). The sample client photographs are
+> generated placeholders, not real client premises.
 
 ---
 
