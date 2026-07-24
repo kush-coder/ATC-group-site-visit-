@@ -12,6 +12,70 @@ cloud server, or online database**.
 
 ---
 
+## 📱 Screenshots
+
+An elegant green-and-white design system: gradient headers, rounded cards, soft
+shadows, animated counters, chips and badges, sticky action bars and premium
+empty states — edge-to-edge and safe-area aware.
+
+### Android
+
+| Dashboard | New Visit (step 1 of 11) | Visit Details |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/android/03-dashboard.jpg" width="240" alt="Android dashboard with animated stats and quick actions" /> | <img src="docs/screenshots/android/06-new-visit.jpg" width="240" alt="Android multi-step new visit form" /> | <img src="docs/screenshots/android/08-visit-details.jpg" width="240" alt="Android visit details with photo gallery" /> |
+
+| Day-End Report | Today's Visits | Opportunity Assessment |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/android/09-day-end-report.jpg" width="240" alt="Android day-end Excel report screen" /> | <img src="docs/screenshots/android/04-today-visits.jpg" width="240" alt="Android today's visits list" /> | <img src="docs/screenshots/android/07-opportunities.jpg" width="240" alt="Android opportunity assessment step" /> |
+
+<details>
+<summary><b>More Android screens</b> — splash, employee setup, all visits, follow-ups, settings, about</summary>
+
+| Splash | Employee Setup | All Visits |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/android/01-splash.jpg" width="240" alt="Animated splash screen" /> | <img src="docs/screenshots/android/02-employee-setup.jpg" width="240" alt="First-time employee setup" /> | <img src="docs/screenshots/android/05-all-visits.jpg" width="240" alt="Searchable visit history" /> |
+
+| Follow-ups | Settings | About |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/android/10-follow-ups.jpg" width="240" alt="Pending follow-ups" /> | <img src="docs/screenshots/android/11-settings.jpg" width="240" alt="Settings with offline indicator" /> | <img src="docs/screenshots/android/12-about.jpg" width="240" alt="About screen" /> |
+
+</details>
+
+### iOS
+
+| Dashboard | New Visit | Visit Details |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/ios/03-dashboard.jpg" width="240" alt="iOS dashboard" /> | <img src="docs/screenshots/ios/06-new-visit.jpg" width="240" alt="iOS new visit form" /> | <img src="docs/screenshots/ios/08-visit-details.jpg" width="240" alt="iOS visit details" /> |
+
+| Day-End Report | Today's Visits | Settings |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/ios/09-day-end-report.jpg" width="240" alt="iOS day-end report" /> | <img src="docs/screenshots/ios/04-today-visits.jpg" width="240" alt="iOS today's visits" /> | <img src="docs/screenshots/ios/11-settings.jpg" width="240" alt="iOS settings" /> |
+
+<details>
+<summary><b>More iOS screens</b> — splash, employee setup, all visits, opportunities, follow-ups, about</summary>
+
+| Splash | Employee Setup | All Visits |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/ios/01-splash.jpg" width="240" alt="iOS splash screen" /> | <img src="docs/screenshots/ios/02-employee-setup.jpg" width="240" alt="iOS employee setup" /> | <img src="docs/screenshots/ios/05-all-visits.jpg" width="240" alt="iOS all visits" /> |
+
+| Opportunities | Follow-ups | About |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/ios/07-opportunities.jpg" width="240" alt="iOS opportunity assessment" /> | <img src="docs/screenshots/ios/10-follow-ups.jpg" width="240" alt="iOS follow-ups" /> | <img src="docs/screenshots/ios/12-about.jpg" width="240" alt="iOS about" /> |
+
+</details>
+
+> **How these were captured.** These are real screenshots of this codebase running
+> in a mobile viewport — Android at 412 × 915 (Pixel-class) and iOS at 393 × 852
+> (iPhone-class) — populated with the app's built-in sample visits, not mockups.
+> The two sets look alike by design: Ionic's mode is pinned to Material
+> (`setupIonicReact({ mode: 'md' })` in `src/App.tsx`) so ATC Group's branding stays
+> identical on both platforms. The Android project ships in `android/`; the iOS
+> target is not generated yet (`npx cap add ios`), so the iOS images show the same
+> build at iPhone dimensions rather than a Simulator capture. Client photos in the
+> samples are generated placeholders.
+
+---
+
 ## ✨ Highlights
 
 - 📵 **100% offline** — SQLite database + device file storage, no internet required

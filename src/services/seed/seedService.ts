@@ -1,18 +1,13 @@
 /**
  * Sample test data: five representative client visits so the dashboard,
  * lists and Excel report can be demonstrated immediately.
- * A tiny embedded JPEG is used as the primary image for each visit.
+ * Each visit gets a branded placeholder photograph as its primary image.
  */
 import { visitRepo, childRepo, imageRepo, generateVisitNumber } from '../database/repository';
 import { fileService } from '../filesystem/fileService';
 import { todayIso, nowTime } from '@/utils/format';
+import { SAMPLE_PHOTOS } from './samplePhotos';
 import type { ClientVisit } from '@/types/models';
-
-// 1x1 green pixel JPEG (base64) - placeholder client photo.
-const SAMPLE_JPEG =
-  '/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRof' +
-  'Hh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/wAALCAABAAEBAREA/8QAFAAB' +
-  'AAAAAAAAAAAAAAAAAAAAAv/EABQQAQAAAAAAAAAAAAAAAAAAAAD/2gAIAQEAAD8AfwD/2Q==';
 
 function baseVisit(over: Partial<ClientVisit>): Partial<ClientVisit> {
   return {
@@ -122,11 +117,12 @@ export const seedService = {
     const existing = await visitRepo.all();
     if (existing.length > 0) return false;
 
-    for (const sample of SAMPLES) {
+    for (const [index, sample] of SAMPLES.entries()) {
       const visitNumber = await generateVisitNumber();
       const id = await visitRepo.create({ ...sample, visit_number: visitNumber });
 
-      const imgPath = await fileService.saveImage(SAMPLE_JPEG, `seed_${id}_${Date.now()}.jpg`);
+      const photo = SAMPLE_PHOTOS[index % SAMPLE_PHOTOS.length];
+      const imgPath = await fileService.saveImage(photo, `seed_${id}_${Date.now()}.jpg`);
       await imageRepo.add({
         visit_id: id, image_path: imgPath, image_type: 'Shop',
         is_primary: 1, caption: `${sample.business_name} storefront`, created_at: new Date().toISOString(),

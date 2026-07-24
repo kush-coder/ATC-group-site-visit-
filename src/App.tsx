@@ -33,7 +33,8 @@ const App: React.FC = () => (
           <Route exact path="/dashboard" component={Dashboard} />
           <Route exact path="/visit/new" component={NewVisit} />
           <Route exact path="/visit/edit/:id" component={NewVisit} />
-          <Route exact path="/visit/:id" component={VisitDetails} />
+          {/* Numeric-only param so "/visit/new" can never fall through to details */}
+          <Route exact path="/visit/:id(\d+)" component={VisitDetails} />
           <Route exact path="/today" component={TodayVisits} />
           <Route exact path="/visits" component={AllVisits} />
           <Route exact path="/followups" component={FollowUps} />
