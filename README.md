@@ -66,6 +66,16 @@ in the browser falls back to the OS file picker; native camera/GPS/sharing requi
 npm run build
 ```
 
+### Unit tests
+Vitest + React Testing Library. Every page has a render test and the core logic
+(validation, formatting, Excel generation) is unit-tested.
+```bash
+npm test            # run once (35 tests across 18 files)
+npm run test:watch  # watch mode
+```
+Native plugins, SQLite, camera, GPS and the filesystem are mocked in
+`src/test/setup.ts`, so the suite runs fast in jsdom without a device.
+
 ---
 
 ## 🤖 Android Build & APK

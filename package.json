@@ -13,7 +13,10 @@
     "cap:sync": "cap sync",
     "cap:android": "cap open android",
     "android:build": "npm run build && cap sync android",
-    "android:run": "npm run build && cap sync android && cap run android"
+    "android:run": "npm run build && cap sync android && cap run android",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
   },
   "dependencies": {
     "@capacitor-community/sqlite": "^6.0.2",
@@ -43,12 +46,18 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^6.2.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@types/react-router": "^5.1.20",
     "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
     "typescript": "^5.7.2",
-    "vite": "^5.4.11"
+    "vite": "^5.4.11",
+    "vitest": "^2.1.9"
   }
 }
